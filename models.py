@@ -7,7 +7,7 @@ import theano.tensor as T
 def softmax(x):
     """Compute softmax values for each sets of scores in x."""
     e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum(axis=0) # only difference
+    return (e_x / e_x.sum(axis=0)) # only difference
 
 
 class RNNNumpy:
@@ -25,13 +25,13 @@ class RNNNumpy:
         self.W = np.random.uniform(-np.sqrt(1./hidden_dim), np.sqrt(1./hidden_dim), 
                 [hidden_dim, hidden_dim])
 
-    def forward(self, x):
+    def forward(self, x, batch_size):
         # find number of time steps in x
         T = len(x)
         # maintain all hidden states, including initial (0)
-        s = np.zeros( [T+1, self.hidden_dim] )
+        s = np.zeros( [T+1, self.hidden_dim, batch_size] )
         # save output at each time step
-        o = np.zeros([T, self.word_dim])
+        o = np.zeros([T, self.word_dim, batch_size])
         # for each time step
         for t in range(T):
             # select column from U based on index in x
@@ -42,7 +42,7 @@ class RNNNumpy:
         return [o,s]
     
     def predict(self,x):
-        o, s = self.forward(x)
+        o, s = self.forward(x, x.shape[-1])
         return np.argmax(o, axis=1)
 
     def loss(self,x,y):
